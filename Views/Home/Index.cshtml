@@ -1,0 +1,213 @@
+@{
+    ViewData["Title"] = "Geleceği Yönetin";
+}
+
+<div class="hero-section py-5 animate-up">
+    <div class="container-fluid px-0">
+        <div class="row align-items-center g-0">
+            <div class="col-lg-5 px-5">
+                <div class="premium-badge mb-4">
+                    <span class="pulse"></span> v2.0 Şanslı Sürüm
+                </div>
+                <h1 class="display-2 fw-800 mb-4" style="line-height: 0.95;">
+                    Kaosun <span class="text-gradient">Düzeni</span> Burada Başlar.
+                </h1>
+                <p class="lead mb-5 opacity-75" style="max-width: 500px; font-size: 1.25rem;">
+                    Kanban Pro, iş akışınızı bir sanat eserine dönüştürür. Estetik, hız ve verimliliğin mükemmel uyumuyla tanışın.
+                </p>
+                
+                <div class="d-flex gap-4">
+                    <a asp-controller="Account" asp-action="Register" class="btn-action">
+                        Şimdi Katıl <i class="fas fa-chevron-right ms-2"></i>
+                    </a>
+                    <a asp-controller="Dashboard" asp-action="Index" class="btn-secondary-custom">
+                        Canlı Demoyu İzle
+                    </a>
+                </div>
+                
+                <div class="mt-5 pt-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="avatar-group">
+                            <img src="https://i.pravatar.cc/100?u=a" alt="u1">
+                            <img src="https://i.pravatar.cc/100?u=b" alt="u2">
+                            <img src="https://i.pravatar.cc/100?u=c" alt="u3">
+                            <div class="avatar-count">+12k</div>
+                        </div>
+                        <div class="small fw-600 text-muted">Global ekiplerin tercihi</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-7 ps-lg-5">
+                <div class="hero-image-wrapper">
+                    <div class="hero-glow"></div>
+                    <img src="~/images/hero.png" alt="Kanban Pro Dashboard" class="img-fluid main-hero-img">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5 mt-5">
+    <div class="row g-5">
+        <div class="col-md-4">
+            <div class="feature-card animate-up" style="animation-delay: 0.2s;">
+                <div class="icon-box purple"><i class="fas fa-bolt"></i></div>
+                <h3 class="h4 mb-3">Işık Hızında</h3>
+                <p class="text-muted">En optimize altyapı ile gecikme yaşamadan tüm görevleri yönetin.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card animate-up" style="animation-delay: 0.4s;">
+                <div class="icon-box emerald"><i class="fas fa-file-export"></i></div>
+                <h3 class="h4 mb-3">Veri Özgürlüğü</h3>
+                <p class="text-muted">Tek tıkla PDF veya Excel çıktısı alarak raporlarınızı her yerde paylaşın.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card animate-up" style="animation-delay: 0.6s;">
+                <div class="icon-box amber"><i class="fas fa-fingerprint"></i></div>
+                <h3 class="h4 mb-3">Güvenli Liman</h3>
+                <p class="text-muted">SQL Server ve modern şifreleme ile verileriniz banka düzeyinde korunur.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-gradient {
+        background: linear-gradient(90deg, #6366f1, #10b981);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .premium-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 15px;
+        background: rgba(99, 102, 241, 0.1);
+        border: 1px solid var(--primary-glow);
+        border-radius: 50px;
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .pulse {
+        width: 8px;
+        height: 8px;
+        background: var(--primary);
+        border-radius: 50%;
+        animation: pulseAnimation 2s infinite;
+    }
+
+    @@keyframes pulseAnimation {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+    }
+
+    .btn-secondary-custom {
+        padding: 1rem 2rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-head);
+        font-weight: 700;
+        text-decoration: none;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-secondary-custom:hover {
+        background: var(--border);
+        border-color: var(--primary);
+    }
+
+    .hero-image-wrapper {
+        position: relative;
+        padding: 20px;
+    }
+
+    .hero-glow {
+        position: absolute;
+        width: 130%;
+        height: 130%;
+        top: -15%;
+        left: -15%;
+        background: radial-gradient(circle, var(--primary-glow) 0%, transparent 60%);
+        z-index: -1;
+        opacity: 0.5;
+    }
+
+    .main-hero-img {
+        border-radius: var(--radius-xl);
+        box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transform: perspective(1000px) rotateY(-10deg) rotateX(2deg);
+        transition: var(--transition);
+    }
+
+    .main-hero-img:hover {
+        transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
+    }
+
+    .avatar-group {
+        display: flex;
+        padding-left: 10px;
+    }
+
+    .avatar-group img {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        border: 3px solid var(--bg-card);
+        margin-left: -10px;
+    }
+
+    .avatar-count {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        border: 3px solid var(--bg-card);
+        margin-left: -10px;
+    }
+
+    .feature-card {
+        padding: 3rem;
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        transition: var(--transition);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        border-color: var(--primary);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .icon-box {
+        width: 60px;
+        height: 60px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .icon-box.purple { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+    .icon-box.emerald { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .icon-box.amber { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+</style>

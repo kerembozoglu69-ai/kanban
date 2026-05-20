@@ -1,0 +1,275 @@
+@model IEnumerable<Kanban.Models.KanbanTask>
+@{
+    ViewData["Title"] = "Görev Analizleri";
+    var upcoming = ViewBag.UpcomingTasks as List<Kanban.Models.KanbanTask> ?? new();
+}
+
+<div class="row g-4 mb-5 animate-up">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+                <div class="text-primary small fw-800">TOPLAM GÖREV</div>
+            </div>
+            <div class="stat-value">@ViewBag.TotalTasks</div>
+            <div class="stat-progress mt-3">
+                <div class="progress" style="height: 6px; border-radius: 10px; background: var(--border);">
+                    <div class="progress-bar bg-primary" style="width: 100%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;"><i class="fas fa-check-circle"></i></div>
+                <div class="text-success small fw-800">TAMAMLANAN</div>
+            </div>
+            <div class="stat-value">@ViewBag.CompletedTasks</div>
+            <div class="stat-progress mt-3">
+                <div class="progress" style="height: 6px; border-radius: 10px; background: var(--border);">
+                    @{
+                        var completePercent = ViewBag.TotalTasks > 0 ? (ViewBag.CompletedTasks * 100 / ViewBag.TotalTasks) : 0;
+                    }
+                    <div class="progress-bar bg-success" style="width: @completePercent%"></div>
+                </div>
+                <div class="text-end text-muted small mt-1">%@completePercent tamamlandı</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--accent);"><i class="fas fa-spinner"></i></div>
+                <div class="text-warning small fw-800">DEVAM EDEN</div>
+            </div>
+            <div class="stat-value">@ViewBag.InProgressTasks</div>
+            <div class="stat-progress mt-3">
+                <div class="progress" style="height: 6px; border-radius: 10px; background: var(--border);">
+                    @{
+                        var progressPercent = ViewBag.TotalTasks > 0 ? (ViewBag.InProgressTasks * 100 / ViewBag.TotalTasks) : 0;
+                    }
+                    <div class="progress-bar bg-warning" style="width: @progressPercent%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #6366f1, #a855f7); color: white;">
+            <div class="stat-header border-0">
+                <div class="stat-icon" style="background: rgba(255, 255, 255, 0.2); color: white;"><i class="fas fa-calendar-check"></i></div>
+                <div class="small fw-800" style="color: rgba(255,255,255,0.8)">ZAMANINDA BİTİRME</div>
+            </div>
+            <div class="stat-value">@completePercent%</div>
+            <div class="small mt-3 opacity-75">Genel verimlilik oranı</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 animate-up" style="animation-delay: 0.1s;">
+    <!-- Status Distribution -->
+    <div class="col-md-4">
+        <div class="stat-card h-100">
+            <h3 class="fw-800 h5 mb-4">Durum Dağılımı</h3>
+            <div style="height: 250px;">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Priority Distribution -->
+    <div class="col-md-4">
+        <div class="stat-card h-100">
+            <h3 class="fw-800 h5 mb-4">Öncelik Dağılımı</h3>
+            <div style="height: 250px;">
+                <canvas id="priorityChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Deadlines -->
+    <div class="col-md-4">
+        <div class="stat-card h-100">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-800 h5 mb-0">Yaklaşan Tarihler</h3>
+                <span class="badge bg-light text-muted border px-3">BU AY</span>
+            </div>
+            
+            <div class="deadline-list">
+                @if (!upcoming.Any())
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-calendar-check opacity-25 fa-3x mb-3"></i>
+                        <p class="text-muted small">Yakın zamanda bitiş tarihi olan görev yok.</p>
+                    </div>
+                }
+                @foreach (var task in upcoming)
+                {
+                    <div class="deadline-item p-3 mb-2 rounded-3 border d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="dot @(task.Priority == TaskPriority.Acil ? "bg-danger" : "bg-warning")"></div>
+                            <div>
+                                <div class="fw-700 small">@task.Title</div>
+                                <div class="text-muted extra-small">#@task.Id</div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-800 small text-primary">@task.DueDate?.ToString("dd MMM")</div>
+                            <div class="text-muted extra-small">@( (task.DueDate.Value - DateTime.Now).Days ) gün kaldı</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-5 animate-up" style="animation-delay: 0.2s;">
+    <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-800 h5 mb-0">Raporlama Merkezi</h3>
+            <div class="d-flex gap-2">
+                <button id="exportExcel" class="btn btn-sm btn-outline-success px-4 fw-800 border-2">
+                    <i class="fas fa-file-excel me-2"></i> EXCEL İNDİR
+                </button>
+                <button id="exportPdf" class="btn btn-sm btn-outline-danger px-4 fw-800 border-2">
+                    <i class="fas fa-file-pdf me-2"></i> PDF OLARAK KAYDET
+                </button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="premium-table" id="taskReportTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>GÖREV</th>
+                        <th>DURUM</th>
+                        <th>ÖNCELİK</th>
+                        <th>BİTİŞ</th>
+                        <th>SORUMLU</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var task in Model)
+                    {
+                        <tr>
+                            <td>#@task.Id</td>
+                            <td><div class="fw-700">@task.Title</div></td>
+                            <td>
+                                <span class="badge bg-light text-dark border">@task.Status</span>
+                            </td>
+                            <td>
+                                @{
+                                    var pColor = task.Priority == TaskPriority.Acil ? "text-danger" : 
+                                                task.Priority == TaskPriority.Yüksek ? "text-warning" : "text-primary";
+                                }
+                                <div class="fw-800 small @pColor">@task.Priority</div>
+                            </td>
+                            <td class="small">@(task.DueDate?.ToString("dd.MM.yyyy") ?? "-")</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="https://ui-avatars.com/api/?name=@(task.AssignedToUser?.FullName ?? "U")&size=24&background=random" class="rounded-circle">
+                                    <span class="small fw-600">@(task.AssignedToUser?.FullName ?? "Atanmamış")</span>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .extra-small { font-size: 0.65rem; }
+    .deadline-item { background: var(--bg-main); transition: var(--transition); }
+    .deadline-item:hover { transform: translateX(5px); border-color: var(--primary); }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const chartDataResponse = await fetch('/Dashboard/GetChartData');
+            const { statusData, priorityData } = await chartDataResponse.json();
+
+            // Status Chart
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: statusData.map(d => d.name),
+                    datasets: [{
+                        data: statusData.map(d => d.total),
+                        backgroundColor: ['#94a3b8', '#6366f1', '#10b981'],
+                        borderWidth: 0,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { usePointStyle: true, font: { weight: 700 } } }
+                    },
+                    cutout: '70%'
+                }
+            });
+
+            // Priority Chart
+            const priorityCtx = document.getElementById('priorityChart').getContext('2d');
+            new Chart(priorityCtx, {
+                type: 'bar',
+                data: {
+                    labels: priorityData.map(d => d.name),
+                    datasets: [{
+                        label: 'Görev Sayısı',
+                        data: priorityData.map(d => d.total),
+                        backgroundColor: priorityData.map(d => {
+                            if (d.name === 'Acil') return '#ef4444';
+                            if (d.name === 'Yüksek') return '#f59e0b';
+                            if (d.name === 'Normal') return '#6366f1';
+                            return '#94a3b8';
+                        }),
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { display: false } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Export Logic
+            document.getElementById('exportExcel').addEventListener('click', () => {
+                const table = document.getElementById('taskReportTable');
+                const wb = XLSX.utils.table_to_book(table, { sheet: "Görev Raporu" });
+                XLSX.writeFile(wb, "Kanban_Kapsamli_Rapor.xlsx");
+            });
+
+            document.getElementById('exportPdf').addEventListener('click', () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.setFontSize(22);
+                doc.setTextColor(99, 102, 241);
+                doc.text("Kanban Pro Kurumsal Taslak", 14, 20);
+                doc.setFontSize(10);
+                doc.setTextColor(100);
+                doc.text(`Rapor Tarihi: ${new Date().toLocaleString('tr-TR')}`, 14, 30);
+                
+                doc.autoTable({
+                    html: '#taskReportTable',
+                    startY: 40,
+                    headStyles: { fillColor: [99, 102, 241], fontStyle: 'bold' },
+                    theme: 'grid'
+                });
+                
+                doc.save("Kanban_Pro_Analiz.pdf");
+            });
+        });
+    </script>
+}

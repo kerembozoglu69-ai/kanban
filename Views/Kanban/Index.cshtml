@@ -1,0 +1,291 @@
+@model IEnumerable<Kanban.Models.KanbanTask>
+@{
+    ViewData["Title"] = "Görev Panosu";
+    var todoTasks = Model.Where(t => t.Status == "Yapılacak").OrderBy(t => t.Order);
+    var inProgressTasks = Model.Where(t => t.Status == "Yapılıyor").OrderBy(t => t.Order);
+    var doneTasks = Model.Where(t => t.Status == "Bitti").OrderBy(t => t.Order);
+}
+
+<div class="mb-5 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4 animate-up">
+    <div>
+        <h2 class="h3 mb-1">Takım Panosu</h2>
+        <p class="text-muted small mb-0">Toplam @Model.Count() aktif görev yönetiliyor.</p>
+    </div>
+    
+    <div class="d-flex gap-3 align-items-center">
+        <!-- Search Bar -->
+        <div class="search-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" id="boardSearch" class="form-control" placeholder="Görev ara...">
+        </div>
+        
+        <button class="btn-action" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+            <i class="fas fa-plus"></i> Görev Ekle
+        </button>
+    </div>
+</div>
+
+<div class="kanban-board animate-up" style="animation-delay: 0.1s;">
+    <!-- Yapılacak Sütunu -->
+    <div class="kanban-column">
+        <div class="column-header">
+            <h3 class="column-title"><div class="dot dot-todo shadow-glow"></div> Yapılacak</h3>
+            <div class="badge-count">@todoTasks.Count()</div>
+        </div>
+        <div class="card-list" id="todo-list" data-status="Yapılacak">
+            @foreach (var task in todoTasks)
+            {
+                <partial name="_TaskCard" model="task" />
+            }
+        </div>
+    </div>
+
+    <!-- Yapılıyor Sütunu -->
+    <div class="kanban-column">
+        <div class="column-header">
+            <h3 class="column-title"><div class="dot dot-progress shadow-glow"></div> Yapılıyor</h3>
+            <div class="badge-count">@inProgressTasks.Count()</div>
+        </div>
+        <div class="card-list" id="progress-list" data-status="Yapılıyor">
+            @foreach (var task in inProgressTasks)
+            {
+                <partial name="_TaskCard" model="task" />
+            }
+        </div>
+    </div>
+
+    <!-- Bitti Sütunu -->
+    <div class="kanban-column">
+        <div class="column-header">
+            <h3 class="column-title"><div class="dot dot-done shadow-glow"></div> Bitti</h3>
+            <div class="badge-count">@doneTasks.Count()</div>
+        </div>
+        <div class="card-list" id="done-list" data-status="Bitti">
+            @foreach (var task in doneTasks)
+            {
+                <partial name="_TaskCard" model="task" />
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Add Task Modal -->
+<div class="modal fade" id="addTaskModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass" style="border-radius: 1.5rem;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-800">Yeni Görev Tanımla</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="CreateTask" method="post">
+                <div class="modal-body py-4">
+                    <div class="mb-4">
+                        <label class="form-label fw-600 text-muted small uppercase">Başlık</label>
+                        <input type="text" name="title" class="form-control" required placeholder="Görev ismini giriniz...">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-600 text-muted small uppercase">Açıklama</label>
+                        <textarea name="description" class="form-control" rows="3" placeholder="Detayları buraya ekleyebilirsiniz..."></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-600 text-muted small uppercase">Öncelik</label>
+                            <select name="priority" class="form-control">
+                                <option value="Düşük">Düşük</option>
+                                <option value="Normal" selected>Normal</option>
+                                <option value="Yüksek">Yüksek</option>
+                                <option value="Acil">Acil</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-600 text-muted small uppercase">Bitiş Tarihi</label>
+                            <input type="date" name="dueDate" class="form-control">
+                        </div>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label fw-600 text-muted small uppercase">Sorumlu</label>
+                        <select name="assignedToUserId" class="form-control">
+                            <option value="">Atanmamış</option>
+                            @foreach (var user in ViewBag.Users)
+                            {
+                                <option value="@user.Id">@user.FullName</option>
+                            }
+                        </select>
+                    </div>
+                    <input type="hidden" name="status" value="Yapılacak">
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="submit" class="btn-action w-100 justify-content-center">Görevi Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Task Modal -->
+<div class="modal fade" id="editTaskModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass" style="border-radius: 1.5rem;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-800">Görevi Düzenle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="EditTask" method="post" id="editTaskForm">
+                <input type="hidden" name="id" id="editTaskId">
+                <div class="modal-body py-4">
+                    <div class="mb-4">
+                        <label class="form-label fw-600 text-muted small uppercase">Başlık</label>
+                        <input type="text" name="title" id="editTitle" class="form-control" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-600 text-muted small uppercase">Açıklama</label>
+                        <textarea name="description" id="editDescription" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-600 text-muted small uppercase">Öncelik</label>
+                            <select name="priority" id="editPriority" class="form-control">
+                                <option value="Düşük">Düşük</option>
+                                <option value="Normal">Normal</option>
+                                <option value="Yüksek">Yüksek</option>
+                                <option value="Acil">Acil</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-600 text-muted small uppercase">Bitiş Tarihi</label>
+                            <input type="date" name="dueDate" id="editDueDate" class="form-control">
+                        </div>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label fw-600 text-muted small uppercase">Sorumlu</label>
+                        <select name="assignedToUserId" id="editAssignedToUserId" class="form-control">
+                            <option value="">Atanmamış</option>
+                            @foreach (var user in ViewBag.Users)
+                            {
+                                <option value="@user.Id">@user.FullName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="submit" class="btn-action w-100 justify-content-center">Değişiklikleri Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .search-wrapper {
+        position: relative;
+        width: 300px;
+    }
+    .search-wrapper i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+    }
+    .search-wrapper input {
+        padding-left: 2.5rem;
+        border-radius: 12px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+    }
+    .uppercase { text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem; }
+    
+    .badge-count {
+        background: var(--border);
+        color: var(--text-muted);
+        padding: 2px 10px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.75rem;
+    }
+    .shadow-glow { box-shadow: 0 0 10px var(--primary-glow); }
+    .premium-shadow { box-shadow: var(--shadow-premium); }
+    .avatar-stack img { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--bg-card); }
+    .completed-card { background: rgba(16, 185, 129, 0.02); }
+    .kanban-card { transition: var(--transition); border: 1px solid var(--border); }
+    .kanban-card:hover { border-color: var(--primary); transform: scale(1.02); }
+    .sortable-ghost { opacity: 0.4; transform: scale(0.95); }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Sortable Logic
+            const lists = document.querySelectorAll('.card-list');
+            lists.forEach(list => {
+                new Sortable(list, {
+                    group: 'kanban',
+                    animation: 250,
+                    easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+                    ghostClass: 'sortable-ghost',
+                    onEnd: (evt) => {
+                        const taskId = evt.item.dataset.id;
+                        const newStatus = evt.to.dataset.status;
+                        fetch('/Kanban/UpdateTaskStatus', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ taskId: parseInt(taskId), newStatus: newStatus })
+                        }).then(res => {
+                            if (res.ok) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Güncellendi',
+                                    text: 'Görev durumu başarıyla değiştirildi.',
+                                    toast: true,
+                                    position: 'bottom-end',
+                                    showConfirmButton: false,
+                                    timer: 2000,
+                                    timerProgressBar: true
+                                });
+                            }
+                        });
+                        
+                        // Visual update
+                        const tag = evt.item.querySelector('.card-tag');
+                        const title = evt.item.querySelector('.card-title');
+                        title.classList.remove('text-decoration-line-through', 'text-muted');
+                        if (newStatus === 'Bitti') {
+                            title.classList.add('text-decoration-line-through', 'text-muted');
+                        }
+                    }
+                });
+            });
+
+            // Search Logic
+            const searchInput = document.getElementById('boardSearch');
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                document.querySelectorAll('.kanban-card').forEach(card => {
+                    const title = card.querySelector('.card-title').innerText.toLowerCase();
+                    const desc = card.querySelector('.card-desc').innerText.toLowerCase();
+                    if (title.includes(term) || desc.includes(term)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+
+            // Edit Modal Logic
+            window.openEditModal = async (id) => {
+                const response = await fetch(`/Kanban/GetTaskDetails/${id}`);
+                const task = await response.json();
+                
+                document.getElementById('editTaskId').value = task.id;
+                document.getElementById('editTitle').value = task.title;
+                document.getElementById('editDescription').value = task.description;
+                document.getElementById('editPriority').value = task.priority;
+                document.getElementById('editDueDate').value = task.dueDate;
+                document.getElementById('editAssignedToUserId').value = task.assignedToUserId;
+                
+                const modal = new bootstrap.Modal(document.getElementById('editTaskModal'));
+                modal.show();
+            };
+        });
+    </script>
+}

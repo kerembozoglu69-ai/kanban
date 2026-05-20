@@ -1,0 +1,136 @@
+@model Kanban.Controllers.AdminViewModel
+@{
+    ViewData["Title"] = "Yönetim Merkezi";
+}
+
+<div class="row g-4 mb-5 animate-up">
+    <!-- System Health (Mocked for Peak Pro Feel) -->
+    <div class="col-md-3">
+        <div class="stat-card border-0" style="background: #0f172a; color: white;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="small fw-800">SUNUCU DURUMU</span>
+                <span class="badge bg-success pulse">AKTİF</span>
+            </div>
+            <div class="h2 fw-800 mb-1">99.9%</div>
+            <div class="small opacity-50">Uptime (Son 30 Gün)</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card border-0" style="background: #1e293b; color: white;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="small fw-800">API GECİKMESİ</span>
+                <i class="fas fa-bolt text-warning"></i>
+            </div>
+            <div class="h2 fw-800 mb-1">24ms</div>
+            <div class="small opacity-50">Ortalama Yanıt Süresi</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <span class="small fw-800 text-muted">AKTİF OTURUMLAR</span>
+            <div class="h2 fw-800 mb-1">1,240</div>
+            <div class="small text-success fw-700"><i class="fas fa-arrow-up"></i> 12% artış</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <span class="small fw-800 text-muted">VERİTABANI BOYUTU</span>
+            <div class="h2 fw-800 mb-1">128 MB</div>
+            <div class="small text-muted">SQL Server LocalDB</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-5 animate-up" style="animation-delay: 0.1s;">
+    <!-- Kullanıcı Performans İstatistikleri -->
+    <div class="col-md-8">
+        <div class="stat-card p-0 overflow-hidden">
+            <div class="p-4 bg-primary text-white d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="fw-800 h4 mb-1 text-white">Kullanıcı Performansı</h3>
+                    <p class="mb-0 opacity-75 small">EKİP ÜYELERİNİN GÖREV DAĞILIMI VE BAŞARISI</p>
+                </div>
+            </div>
+            <div class="p-4">
+                <div class="table-responsive">
+                    <table class="premium-table">
+                        <thead>
+                            <tr>
+                                <th>Kullanıcı</th>
+                                <th>Toplam Görev</th>
+                                <th>Devam Eden</th>
+                                <th>Tamamlanan</th>
+                                <th>Başarı Oranı</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var stat in Model.UserStats)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img src="https://ui-avatars.com/api/?name=@stat.FullName&background=random" class="rounded-circle" style="width: 32px; height: 32px;">
+                                            <div class="fw-700">@stat.FullName</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="fw-800">@stat.TotalTasks</span></td>
+                                    <td><span class="badge bg-light text-warning border">@stat.InProgressTasks</span></td>
+                                    <td><span class="badge bg-light text-success border">@stat.CompletedTasks</span></td>
+                                    <td>
+                                        @{
+                                            var successRate = stat.TotalTasks > 0 ? (stat.CompletedTasks * 100 / stat.TotalTasks) : 0;
+                                            var color = successRate >= 70 ? "success" : successRate >= 40 ? "warning" : "danger";
+                                        }
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="progress flex-grow-1" style="height: 6px; border-radius: 10px;">
+                                                <div class="progress-bar bg-@color" style="width: @successRate%"></div>
+                                            </div>
+                                            <span class="small fw-800">%@successRate</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistem Kontrolleri -->
+    <div class="col-md-4">
+        <div class="stat-card">
+            <h3 class="fw-800 h5 mb-4 border-bottom pb-3">Hızlı İşlemler</h3>
+            
+            <div class="d-grid gap-3">
+                <div class="p-3 rounded-3 border bg-light d-flex justify-content-between align-items-center">
+                    <div class="small fw-700"><i class="fas fa-user-plus me-2"></i> Yeni Kullanıcı Kaydı</div>
+                    <span class="badge bg-success">AÇIK</span>
+                </div>
+                <div class="p-3 rounded-3 border bg-light d-flex justify-content-between align-items-center">
+                    <div class="small fw-700"><i class="fas fa-file-export me-2"></i> Toplu Veri Aktarımı</div>
+                    <button class="btn btn-sm btn-dark px-3 fw-800">BAŞLAT</button>
+                </div>
+                <div class="p-3 rounded-3 border bg-light d-flex justify-content-between align-items-center">
+                    <div class="small fw-700 text-danger"><i class="fas fa-trash-alt me-2"></i> Tüm Arşivi Temizle</div>
+                    <button class="btn btn-sm btn-outline-danger px-3 fw-800">SİL</button>
+                </div>
+            </div>
+            
+            <div class="mt-5 p-4 rounded-4 bg-primary text-white text-center">
+                <i class="fas fa-shield-alt fa-3x mb-3 opacity-50"></i>
+                <h4 class="fw-800">Kurumsal Güvenlik</h4>
+                <p class="small opacity-75 mb-0">Tüm sistem aktiviteleri loglanmakta ve şifrelenmektedir.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .pulse { animation: pulseAnim 2s infinite; }
+    @@keyframes pulseAnim {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+</style>

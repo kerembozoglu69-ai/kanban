@@ -1,0 +1,57 @@
+@model Kanban.Models.KanbanTask
+
+<div class="kanban-card premium-shadow @(Model.Status == "Bitti" ? "completed-card" : "")" data-id="@Model.Id" onclick="openEditModal(@Model.Id)" style="cursor: pointer;">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+        @{
+            var priorityClass = Model.Priority switch
+            {
+                TaskPriority.Acil => "bg-danger text-white",
+                TaskPriority.Yüksek => "bg-warning text-dark",
+                TaskPriority.Normal => "bg-info text-dark",
+                TaskPriority.Düşük => "bg-light text-muted border",
+                _ => "bg-light"
+            };
+        }
+        <span class="card-tag @priorityClass" style="border-radius: 6px; padding: 2px 8px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase;">
+            @Model.Priority
+        </span>
+        
+        @if (Model.DueDate.HasValue && Model.Status != "Bitti")
+        {
+            var daysLeft = (Model.DueDate.Value - DateTime.Now).Days;
+            if (daysLeft < 0)
+            {
+                <span class="text-danger fw-800" style="font-size: 0.65rem;"><i class="fas fa-exclamation-triangle"></i> GECİKTİ</span>
+            }
+            else if (daysLeft <= 1)
+            {
+                <span class="text-warning fw-800" style="font-size: 0.65rem;"><i class="fas fa-clock"></i> ACİL</span>
+            }
+        }
+    </div>
+    
+    <div class="card-title @(Model.Status == "Bitti" ? "text-decoration-line-through text-muted" : "")">@Model.Title</div>
+    <div class="card-desc @(Model.Status == "Bitti" ? "opacity-50" : "")">@Model.Description</div>
+    
+    <div class="card-meta mt-3 pt-3 border-top" style="border-style: dashed !important; border-color: var(--border) !important;">
+        <div class="d-flex align-items-center gap-2 text-muted small">
+            <i class="far fa-calendar-alt"></i>
+            <span>@(Model.DueDate?.ToString("dd MMM") ?? Model.CreatedAt.ToString("dd MMM"))</span>
+        </div>
+        
+        <div class="avatar-stack">
+            @if (Model.AssignedToUser != null)
+            {
+                <img src="https://ui-avatars.com/api/?name=@(Model.AssignedToUser.FullName)&background=6366f1&color=fff" 
+                     data-bs-toggle="tooltip" 
+                     title="Sorumlu: @Model.AssignedToUser.FullName">
+            }
+            else
+            {
+                <img src="https://ui-avatars.com/api/?name=U&background=f1f5f9&color=94a3b8" 
+                     data-bs-toggle="tooltip" 
+                     title="Atanmamış">
+            }
+        </div>
+    </div>
+</div>
